@@ -18,7 +18,7 @@ interface Task {
 // Interface para o estado da store
 interface TodoState {
   categories: Category[];
-  tasks: Task[];
+  tasks: Task[]; // Este será inicializado como um array vazio
   isLoading: boolean;
   error: string | null;
 
@@ -27,32 +27,24 @@ interface TodoState {
   // Futuramente: updateCategory, deleteCategory
 
   // Funções para Tarefas
-  fetchTasks: () => Promise<void>; // Ainda mockada, mas poderia buscar tudo
-  addTask: (title: string, categoryId: string | null) => Promise<void>; // Recebe categoryId
+  fetchTasks: () => Promise<void>;
+  addTask: (title: string, categoryId: string | null) => Promise<void>;
   toggleTask: (id: string) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
-  updateTask: (id: string, newTitle: string, newCategoryId?: string | null) => Promise<void>; // Pode mudar categoria
+  updateTask: (id: string, newTitle: string, newCategoryId?: string | null) => Promise<void>;
 }
 
 // Função para gerar IDs únicos simples para o mock
 const generateId = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-
 export const useTodoStore = create<TodoState>((set, get) => ({
-  // --- DADOS INICIAIS MOCKADOS ---
-  categories: [
+  // --- DADOS INICIAIS ---
+  categories: [ // Mantendo as categorias mockadas, você pode remover se não precisar delas agora
     { id: 'cat1_study', name: 'Estudo' },
     { id: 'cat2_work', name: 'Trabalho' },
     { id: 'cat3_personal', name: 'Pessoal' },
   ],
-  tasks: [
-    { id: generateId(), title: 'Revisar aula de Zustand', completed: true, categoryId: 'cat1_study' },
-    { id: generateId(), title: 'Preparar apresentação', completed: false, categoryId: 'cat2_work' },
-    { id: generateId(), title: 'Ir ao mercado', completed: false, categoryId: 'cat3_personal' },
-    { id: generateId(), title: 'Ler documentação do Expo Router', completed: false, categoryId: 'cat1_study' },
-    { id: generateId(), title: 'Enviar emails importantes', completed: true, categoryId: 'cat2_work' },
-    { id: generateId(), title: 'Agendar consulta', completed: false, categoryId: null }, // Tarefa sem categoria
-  ],
+  tasks: [], // MODIFICADO: A lista de tarefas agora começa vazia
   // ---------------------------------
 
   isLoading: false,
@@ -60,8 +52,8 @@ export const useTodoStore = create<TodoState>((set, get) => ({
 
   // --- FUNÇÕES CRUD MOCKADAS PARA CATEGORIAS ---
   addCategory: async (name: string) => {
-    set(state => ({ isLoading: true, error: null })); // Marcar isLoading true antes do timeout
-    await new Promise(resolve => setTimeout(resolve, 300)); // Simula atraso da API
+    set(state => ({ isLoading: true, error: null }));
+    await new Promise(resolve => setTimeout(resolve, 300));
     const newCategory: Category = { id: generateId(), name };
     set(state => ({
       categories: [...state.categories, newCategory],
@@ -74,9 +66,10 @@ export const useTodoStore = create<TodoState>((set, get) => ({
   fetchTasks: async () => {
     set({ isLoading: true, error: null });
     await new Promise(resolve => setTimeout(resolve, 500));
-    // Na versão mockada, as tarefas já estão no estado. Apenas simulamos o carregamento.
+    // Na versão mockada, as tarefas são gerenciadas localmente.
+    // Se estivéssemos buscando de uma API e ela retornasse vazio, seria o mesmo efeito.
     set({ isLoading: false });
-    console.log("fetchTasks mockada foi chamada, usando dados locais.");
+    console.log("fetchTasks mockada foi chamada.");
   },
 
   addTask: async (title: string, categoryId: string | null) => {
@@ -86,7 +79,7 @@ export const useTodoStore = create<TodoState>((set, get) => ({
       id: generateId(),
       title,
       completed: false,
-      categoryId, // Associa a tarefa à categoria fornecida
+      categoryId,
     };
     set(state => ({
       tasks: [...state.tasks, newTask],
@@ -125,8 +118,6 @@ export const useTodoStore = create<TodoState>((set, get) => ({
         task.id === id ? {
           ...task,
           title: newTitle,
-          // Atualiza categoryId apenas se newCategoryId for explicitamente fornecido
-          // (pode ser string ou null). Se for undefined, mantém o categoryId existente.
           categoryId: newCategoryId !== undefined ? newCategoryId : task.categoryId
         } : task
       ),
