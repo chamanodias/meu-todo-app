@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Linking, TouchableOpacity, Platform } from 'react-native';
-import { Link } from 'expo-router';
-import FontAwesome from '@expo/vector-icons/FontAwesome'; // Para ícones
+import { View, Text, StyleSheet, ScrollView, Linking, TouchableOpacity, Platform, Alert } from 'react-native';
+import { Link, useRouter } from 'expo-router'; // Importado useRouter
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { useAuthStore } from '../../store/authStore'; // Importado o authStore
 
-// Componente para exibir informações de um desenvolvedor
+// Componente para exibir informações de um desenvolvedor (mantido como antes)
 const DeveloperInfo = ({
   name,
   matricula,
@@ -18,7 +19,10 @@ const DeveloperInfo = ({
   internalLink: string;
 }) => {
   const openLink = (url: string) => {
-    Linking.openURL(url).catch(err => console.error("Couldn't load page", err));
+    Linking.openURL(url).catch(err => {
+      console.error("Couldn't load page", err);
+      Alert.alert("Erro", "Não foi possível abrir o link.");
+    });
   };
 
   return (
@@ -37,7 +41,6 @@ const DeveloperInfo = ({
         </TouchableOpacity>
       </View>
 
-      {/* Link interno para a página de equipe do Expo Router */}
       <Link href={internalLink as any} asChild>
         <TouchableOpacity style={styles.profileButton}>
           <Text style={styles.profileButtonText}>Ver Perfil no App</Text>
@@ -48,6 +51,19 @@ const DeveloperInfo = ({
 };
 
 export default function SobreScreen() {
+  // Hooks para o logout
+  const logout = useAuthStore((state) => state.logout);
+  const isLoadingAuth = useAuthStore((state) => state.isLoading); // Para desabilitar o botão durante o logout
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logout();
+    // O useEffect no app/_layout.tsx deve cuidar do redirecionamento para /login
+    // Mas podemos forçar se necessário, embora geralmente não seja preciso:
+    // router.replace('/(auth)/login');
+    console.log("Usuário deslogado, _layout.tsx deve redirecionar.");
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.headerContainer}>
@@ -76,15 +92,30 @@ export default function SobreScreen() {
           matricula="845330"
           linkedinUrl="https://www.linkedin.com/in/lucas-dias-23b75a232/"
           githubUrl="https://github.com/chamanodias"
-          internalLink="/equipe/lucasdias"
+          internalLink="/equipe/lucasdias" // Esta rota pode não existir mais se a seção equipe foi removida pelo seu parceiro
         />
         <DeveloperInfo
           name="Lucas Vinícius"
           matricula="850855"
           linkedinUrl="https://www.linkedin.com/in/lucasvinini/"
           githubUrl="https://github.com/Lucavinini"
-          internalLink="/equipe/lucasvinicius"
+          internalLink="/equipe/lucasvinicius" // Esta rota pode não existir mais
         />
+      </View>
+
+      {/* Botão de Logout */}
+      <View style={[styles.section, styles.logoutSection]}>
+        <TouchableOpacity
+          style={[styles.button, styles.logoutButton]}
+          onPress={handleLogout}
+          disabled={isLoadingAuth} // Desabilita enquanto o logout está em progresso
+        >
+          {isLoadingAuth ? (
+            <Text style={styles.buttonText}>Saindo...</Text>
+          ) : (
+            <Text style={styles.buttonText}>Sair (Logout)</Text>
+          )}
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -95,7 +126,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingVertical: Platform.OS === 'ios' ? 20 : 30,
     paddingHorizontal: 15,
-    backgroundColor: '#f0f2f5', // Um tom de cinza mais suave
+    backgroundColor: '#f0f2f5',
   },
   headerContainer: {
     flexDirection: 'row',
@@ -139,11 +170,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 18,
     textAlign: 'center',
-    color: '#007bff', // Azul para subtítulos
+    color: '#007bff',
   },
   listItemContainer: {
-    alignItems: 'flex-start', // Mantém à esquerda
-    paddingLeft: 10, // Leve recuo para os itens
+    alignItems: 'flex-start',
+    paddingLeft: 10,
   },
   listItem: {
     fontSize: 16,
@@ -153,10 +184,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   developerContainer: {
-    backgroundColor: '#f9f9f9', // Fundo levemente diferente para cada dev
+    backgroundColor: '#f9f9f9',
     borderRadius: 10,
     padding: 18,
-    marginBottom: 20, // Espaço entre os cards de desenvolvedor
+    marginBottom: 20,
     borderWidth: 1,
     borderColor: '#e7e7e7',
   },
@@ -175,17 +206,17 @@ const styles = StyleSheet.create({
   },
   socialLinksContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around', // Ou 'space-evenly'
+    justifyContent: 'space-around',
     marginBottom: 15,
   },
   socialButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007bff', // Azul primário
+    backgroundColor: '#007bff',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 20, // Mais arredondado
-    minWidth: 110, // Largura mínima
+    borderRadius: 20,
+    minWidth: 110,
     justifyContent: 'center',
   },
   socialButtonText: {
@@ -195,7 +226,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   profileButton: {
-    backgroundColor: '#6c757d', // Cinza secundário
+    backgroundColor: '#6c757d',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -204,6 +235,34 @@ const styles = StyleSheet.create({
   profileButtonText: {
     color: 'white',
     fontSize: 15,
+    fontWeight: 'bold',
+  },
+  // Estilos para o botão de logout
+  logoutSection: { // Para dar um espaçamento e fundo consistentes
+    paddingBottom: Platform.OS === 'ios' ? 30 : 20, // Espaço extra no final
+  },
+  button: { // Estilo base para botões (reutilizado do DeveloperInfo, mas pode ser mais genérico)
+    backgroundColor: '#007bff',
+    paddingVertical: 14,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4,
+  },
+  logoutButton: {
+    backgroundColor: '#dc3545', // Vermelho para logout/destrutivo
+    marginTop: 10, // Espaçamento se houver conteúdo acima na mesma seção
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 17,
     fontWeight: 'bold',
   },
 });
