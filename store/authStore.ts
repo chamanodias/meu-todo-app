@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { authService } from '../services/api';
 
 interface User { // Uma interface simples para o usuário
   id: string;
@@ -11,65 +13,110 @@ interface AuthState {
   user: User | null;
   isLoading: boolean; // Para simular chamadas de API
   error: string | null;
-  login: (email: string, pass: string) => Promise<boolean>; // Retorna true se sucesso
-  register: (email: string, pass: string) => Promise<boolean>; // Retorna true se sucesso
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  clearError: () => void;
   // Futuramente: checkAuthStatus, etc.
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-  isAuthenticated: false, // Começa deslogado
+export const useAuthStore = create<AuthState>((set) => ({
+  isAuthenticated: false,
   user: null,
   isLoading: false,
   error: null,
 
-  // Mock da função de login
-  login: async (email: string, pass: string) => {
-    set({ isLoading: true, error: null });
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simula chamada à API
+  clearError: () => set({ error: null }),
 
-    // Lógica de login mockada (extremamente simples)
-    if (email && pass) { // Não valida as credenciais, apenas verifica se foram preenchidas
-      const mockUser: User = { id: 'user123', email: email };
-      set({ isAuthenticated: true, user: mockUser, isLoading: false });
-      console.log('Login mock bem-sucedido:', mockUser);
+  login: async (email: string, password: string) => {
+    try {
+      set({ isLoading: true, error: null });
+      
+      // Validação básica
+      if (!email || !password) {
+        set({ 
+          isLoading: false, 
+          error: 'Email e senha são obrigatórios' 
+        });
+        return false;
+      }
+
+      const response = await authService.login(email, password);
+      
+      await AsyncStorage.setItem('token', response.token);
+      
+      set({
+        isAuthenticated: true,
+        user: response.user,
+        isLoading: false,
+        error: null,
+      });
       return true;
-    } else {
-      const errorMsg = 'Email ou senha inválidos (mock)';
-      set({ isAuthenticated: false, user: null, isLoading: false, error: errorMsg });
-      console.error('Falha no login mock:', errorMsg);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao fazer login';
+      set({
+        isAuthenticated: false,
+        user: null,
+        isLoading: false,
+        error: errorMessage,
+      });
       return false;
     }
   },
 
-  // Mock da função de registro
-  register: async (email: string, pass: string) => {
-    set({ isLoading: true, error: null });
-    await new Promise(resolve => setTimeout(resolve, 1000));
+  register: async (email: string, password: string) => {
+    try {
+      set({ isLoading: true, error: null });
 
-    // Lógica de registro mockada
-    if (email && pass) {
-      const mockUser: User = { id: generateId(), email: email }; // Usando generateId se tiver
-      // Em um app real, você não logaria o usuário automaticamente após o registro
-      // ou logaria e já o colocaria como isAuthenticated: true
-      console.log('Registro mock bem-sucedido para:', mockUser);
-      // Por enquanto, o registro mock não loga o usuário automaticamente
-      set({ isLoading: false });
-      return true; // Indica sucesso no registro, o usuário pode então fazer login
-    } else {
-      const errorMsg = 'Dados de registro inválidos (mock)';
-      set({ isLoading: false, error: errorMsg });
-      console.error('Falha no registro mock:', errorMsg);
+      // Validação básica
+      if (!email || !password) {
+        set({ 
+          isLoading: false, 
+          error: 'Email e senha são obrigatórios' 
+        });
+        return false;
+      }
+
+      if (password.length < 6) {
+        set({ 
+          isLoading: false, 
+          error: 'A senha deve ter pelo menos 6 caracteres' 
+        });
+        return false;
+      }
+
+      const response = await authService.register(email, password);
+      set({ 
+        isLoading: false,
+        error: null,
+      });
+      return true;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao registrar';
+      set({
+        isLoading: false,
+        error: errorMessage,
+      });
       return false;
     }
   },
 
-  // Mock da função de logout
   logout: async () => {
-    set({ isLoading: true });
-    await new Promise(resolve => setTimeout(resolve, 500));
-    set({ isAuthenticated: false, user: null, isLoading: false, error: null });
-    console.log('Logout mock realizado.');
+    try {
+      await AsyncStorage.removeItem('token');
+      set({
+        isAuthenticated: false,
+        user: null,
+        isLoading: false,
+        error: null,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao fazer logout';
+      set({
+        isLoading: false,
+        error: errorMessage,
+      });
+    }
   },
 }));
 

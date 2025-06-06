@@ -40,12 +40,6 @@ const DeveloperInfo = ({
           <Text style={styles.socialButtonText}>GitHub</Text>
         </TouchableOpacity>
       </View>
-
-      <Link href={internalLink as any} asChild>
-        <TouchableOpacity style={styles.profileButton}>
-          <Text style={styles.profileButtonText}>Ver Perfil no App</Text>
-        </TouchableOpacity>
-      </Link>
     </View>
   );
 };
@@ -101,6 +95,31 @@ export default function SobreScreen() {
           githubUrl="https://github.com/Lucavinini"
           internalLink="/equipe/lucasvinicius" // Esta rota pode não existir mais
         />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.subtitle}>Mais sobre o projeto</Text>
+        <Text style={styles.descriptionText}>
+          Este aplicativo foi desenvolvido para gerenciar tarefas de forma simples e segura, com autenticação de usuários e armazenamento em nuvem.
+          {'\n'}\nTecnologias utilizadas:
+          {'\n'}- React Native (Expo)
+          {'\n'}- Zustand para gerenciamento de estado
+          {'\n'}- Node.js + Express no backend
+          {'\n'}- MongoDB Atlas como banco de dados na nuvem
+          {'\n'}\nDificuldades enfrentadas:
+          {'\n'}- Integração entre app mobile e backend rodando localmente
+          {'\n'}- Configuração do MongoDB Atlas e string de conexão segura
+          {'\n'}- Tratamento de autenticação JWT e persistência do token no AsyncStorage
+          {'\n'}- Ajuste de permissões de rede para acesso via celular real
+          {'\n'}\nBanco de dados:
+          {'\n'}Utilizamos o MongoDB Atlas, um serviço de banco de dados na nuvem, garantindo segurança, escalabilidade e fácil acesso de qualquer lugar.
+        </Text>
+      </View>
+
+      <View style={styles.section}>
+        <TouchableOpacity style={[styles.button, {backgroundColor: '#28a745'}]} onPress={() => router.push('/(tabs)/desenvolvedores')}>
+          <Text style={styles.buttonText}>Ver Desenvolvedores</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Botão de Logout */}
@@ -224,18 +243,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     marginLeft: 8,
-  },
-  profileButton: {
-    backgroundColor: '#6c757d',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  profileButtonText: {
-    color: 'white',
-    fontSize: 15,
-    fontWeight: 'bold',
   },
   // Estilos para o botão de logout
   logoutSection: { // Para dar um espaçamento e fundo consistentes
