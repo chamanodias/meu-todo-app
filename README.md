@@ -45,3 +45,9 @@ Utilizamos o MongoDB Atlas, um serviço de banco de dados na nuvem, garantindo s
 ---
 
 Feito com 💙 por Lucas Dias e Lucas Vinícius
+
+
+![Imagem do WhatsApp de 2025-06-06 à(s) 19 47 25_4c162cc2](https://github.com/user-attachments/assets/5ace3b0f-e5b7-491b-9c02-47a5b8c93e7b)
+![Imagem do WhatsApp de 2025-06-06 à(s) 19 47 25_edee11f4](https://github.com/user-attachments/assets/d3cb01da-6136-485a-b1f7-12fbfc2f2a86)
+![Imagem do WhatsApp de 2025-06-06 à(s) 19 47 26_1f3c9f8b](https://github.com/user-attachments/assets/ecbd32d3-aaa0-4f0e-9b33-9dfa2ec78c95)
+
