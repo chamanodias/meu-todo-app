@@ -20,6 +20,7 @@ npx ts-node-dev src/index.ts
 npx expo start
 ```
 
+
 - Escaneie o QR code com o app Expo Go no seu celular.
 
 > **Importante:** O backend e o app devem estar rodando ao mesmo tempo.  
@@ -33,6 +34,11 @@ npx expo start
 - Ajuste de permissões de rede para acesso via celular real
 
 ## 🗄️ Banco de dados
+
+- **Qualquer pessoa pode clonar este repositório e rodar o app e o backend localmente**, desde que siga as instruções acima e configure corretamente o arquivo `.env` com uma string de conexão válida do MongoDB Atlas.
+- **O backend não fica online automaticamente para o mundo**: ele só estará acessível na sua rede local, a menos que você faça deploy em um serviço de hospedagem (Render, Railway, Heroku, etc).
+- **Por segurança, não compartilhe sua string de conexão do MongoDB Atlas publicamente.** Cada usuário deve criar sua própria conta gratuita no MongoDB Atlas e gerar sua própria string de conexão.
+- Se quiser que o backend fique acessível de qualquer lugar, faça o deploy em um serviço de nuvem e aponte o `baseURL` do frontend para a URL pública do backend
 
 Utilizamos o MongoDB Atlas, um serviço de banco de dados na nuvem, garantindo segurança, escalabilidade e fácil acesso de qualquer lugar.
 
